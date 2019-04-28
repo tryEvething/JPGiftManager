@@ -10,7 +10,7 @@
 #import "JPGiftModel.h"
 #import "UIImageView+WebCache.h"
 
-static const NSInteger animationTime = 5;
+static const NSInteger animationTime = 4;
 
 @interface JPGiftShowView()
 
@@ -42,29 +42,40 @@ static const NSInteger animationTime = 5;
 #pragma mark -设置UI
 - (void)p_SetUI {
     
-    self.bgView = [[UIView alloc] initWithFrame:CGRectMake(10, 0, self.frame.size.width-showGiftView_XNum_W-showGiftView_XNum_L, showGiftView_GiftIcon_H)];
-    self.bgView.backgroundColor = [UIColor blackColor];
-    self.bgView.layer.cornerRadius = showGiftView_GiftIcon_H*0.5;
+    self.bgView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width, showGiftView_GiftIcon_H)];
+    self.bgView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.3];
+//    self.bgView.layer.cornerRadius = showGiftView_GiftIcon_H*0.5;
+    
+    //绘制圆角 要设置的圆角 使用“|”来组合
+    UIBezierPath *maskPath = [UIBezierPath bezierPathWithRoundedRect:self.bgView.bounds byRoundingCorners:UIRectCornerTopRight | UIRectCornerBottomRight cornerRadii:CGSizeMake(showGiftView_GiftIcon_H*0.5, showGiftView_GiftIcon_H*0.5)];
+    CAShapeLayer *maskLayer = [[CAShapeLayer alloc] init];
+    //设置大小
+    maskLayer.frame = self.bgView.bounds;
+    //设置图形样子
+    maskLayer.path = maskPath.CGPath;
+    self.bgView.layer.mask = maskLayer;
+    
     [self addSubview:self.bgView];
     
-    self.userIconView = [[UIImageView alloc] initWithFrame:CGRectMake(CGRectGetMinX(self.bgView.frame)+showGiftView_UserIcon_LT, showGiftView_UserIcon_LT, showGiftView_UserIcon_WH, showGiftView_UserIcon_WH)];
-    self.userIconView.layer.cornerRadius = showGiftView_UserIcon_WH*0.5;
-    self.userIconView.layer.masksToBounds = YES;
-    [self addSubview:self.userIconView];
+//    self.userIconView = [[UIImageView alloc] initWithFrame:CGRectMake(CGRectGetMinX(self.bgView.frame)+showGiftView_UserIcon_LT, showGiftView_UserIcon_LT, showGiftView_UserIcon_WH, showGiftView_UserIcon_WH)];
+//    self.userIconView.layer.cornerRadius = showGiftView_UserIcon_WH*0.5;
+//    self.userIconView.layer.masksToBounds = YES;
+//    [self addSubview:self.userIconView];
     
-    self.userNameLabel = [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(self.userIconView.frame)+showGiftView_UserName_L, (showGiftView_GiftIcon_H-2*showGiftView_UserName_H-5)*0.5, showGiftView_UserName_W, showGiftView_UserName_H)];
-    self.userNameLabel.text = @"董江鹏";
+    self.userNameLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, (showGiftView_GiftIcon_H-2*showGiftView_UserName_H-5)*0.5, showGiftView_UserName_W, showGiftView_UserName_H)];
+    self.userNameLabel.text = @"xxx";
     self.userNameLabel.textColor = [UIColor whiteColor];
-    self.userNameLabel.font = [UIFont systemFontOfSize:11];
+    self.userNameLabel.font = [UIFont systemFontOfSize:14];
     [self addSubview:self.userNameLabel];
     
     self.giftNameLabel = [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMinX(self.userNameLabel.frame),CGRectGetMaxY(self.userNameLabel.frame)+5, showGiftView_UserName_W*2, showGiftView_UserName_H)];
-    self.giftNameLabel.text = @"礼物";
+    self.giftNameLabel.text = @"送出 一个火箭";
     self.giftNameLabel.textColor = [UIColor colorWithRed:255/255.0 green:214/255.0 blue:84/255.0 alpha:1];
     self.giftNameLabel.font = [UIFont systemFontOfSize:12];
+    [self.giftNameLabel sizeToFit];
     [self addSubview:self.giftNameLabel];
     
-    self.giftImageView = [[UIImageView alloc] initWithFrame:CGRectMake(CGRectGetMaxX(self.userNameLabel.frame), 0, showGiftView_GiftIcon_W, showGiftView_GiftIcon_H)];
+    self.giftImageView = [[UIImageView alloc] initWithFrame:CGRectMake(CGRectGetMaxX(self.giftNameLabel.frame) + showGiftView_XNum_L, 0, showGiftView_GiftIcon_W, showGiftView_GiftIcon_H)];
     [self addSubview:self.giftImageView];
     
     self.countLabel = [[JPGiftCountLabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(self.giftImageView.frame)+showGiftView_XNum_L, (showGiftView_GiftIcon_H-showGiftView_XNum_H)*0.5, showGiftView_XNum_W, showGiftView_XNum_H)];
@@ -79,10 +90,18 @@ static const NSInteger animationTime = 5;
 - (void)showGiftShowViewWithModel:(JPGiftModel *)giftModel completeBlock:(completeShowViewBlock)completeBlock{
     
     self.finishModel = giftModel;
-    [self.userIconView sd_setImageWithURL:[NSURL URLWithString:giftModel.userIcon] placeholderImage:[UIImage imageNamed:@""]];
+//    [self.userIconView sd_setImageWithURL:[NSURL URLWithString:giftModel.userIcon]];
+    
     self.userNameLabel.text = giftModel.userName;
-    self.giftNameLabel.text = [NSString stringWithFormat:@"送 %@",giftModel.giftName];
-    [self.giftImageView sd_setImageWithURL:[NSURL URLWithString:giftModel.giftImage] placeholderImage:[UIImage imageNamed:@""]];
+    self.giftNameLabel.text = [NSString stringWithFormat:@"送出 %@",giftModel.giftName];
+//    [self.giftNameLabel sizeToFit];
+    
+//    CGRect giftImageViewFrame = self.giftImageView.frame;
+//    giftImageViewFrame.origin.x = CGRectGetMaxX(self.giftNameLabel.frame);
+//    self.giftImageView.frame = giftImageViewFrame;
+    self.giftImageView.contentMode = UIViewContentModeScaleAspectFit;
+    [self.giftImageView sd_setImageWithURL:[NSURL URLWithString:giftModel.giftImage]];
+    
     self.hidden = NO;
     self.showViewFinishBlock = completeBlock;
     NSLog(@"当前展示的礼物--%@",giftModel.giftName);
@@ -99,18 +118,29 @@ static const NSInteger animationTime = 5;
     }];}
 
 - (void)hiddenGiftShowView {
-    
+//    return;
     [UIView animateWithDuration:0.3 animations:^{
-        self.frame =CGRectMake(-self.frame.size.width, self.frame.origin.y-50, self.frame.size.width, self.frame.size.height);
+        self.frame =CGRectMake(0, self.frame.origin.y-50, self.frame.size.width, self.frame.size.height);
+        
+        self.bgView.alpha = 0;
+        self.userNameLabel.alpha = 0;
+        self.giftNameLabel.alpha = 0;
+        self.giftImageView.alpha = 0;
+        self.countLabel.alpha = 0;
     } completion:^(BOOL finished) {
+        self.hidden = YES;
+        
+        self.bgView.alpha = 1;
+        self.userNameLabel.alpha = 1;
+        self.giftNameLabel.alpha = 1;
+        self.giftImageView.alpha = 1;
+        self.countLabel.alpha = 1;
         
         if (self.showViewFinishBlock) {
             self.showViewFinishBlock(YES, self.finishModel.giftKey);
             self.finishModel = nil;
         }
         self.frame =CGRectMake(-self.frame.size.width, self.frame.origin.y+50, self.frame.size.width, self.frame.size.height);
-
-        self.hidden = YES;
         self.currentGiftCount = 0;
         self.countLabel.text = @"";
     }];

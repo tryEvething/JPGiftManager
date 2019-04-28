@@ -46,7 +46,6 @@
     }
     
     _executing = YES;
-    NSLog(@"当前队列-- %@",self.model.giftName);
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
         
         [self.backView addSubview:self.giftShowView];

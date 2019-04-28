@@ -16,7 +16,16 @@
 #define SCREEN_HEIGHT ([UIScreen mainScreen].bounds.size.height)
 
 // 判断是否是iPhone X
-#define iPhoneX ([UIScreen instancesRespondToSelector:@selector(currentMode)] ? CGSizeEqualToSize(CGSizeMake(1125, 2436), [[UIScreen mainScreen] currentMode].size) : NO)
+//#define iPhoneX ([UIScreen instancesRespondToSelector:@selector(currentMode)] ? CGSizeEqualToSize(CGSizeMake(1125, 2436), [[UIScreen mainScreen] currentMode].size) : NO)
+#define iPhoneX ({\
+BOOL isPhoneX = NO;\
+if (@available(iOS 11.0, *)) {\
+if (!UIEdgeInsetsEqualToEdgeInsets([UIApplication sharedApplication].delegate.window.safeAreaInsets, UIEdgeInsetsZero)) {\
+isPhoneX = YES;\
+}\
+}\
+isPhoneX;\
+})
 // 状态栏高度
 #define STATUS_BAR_HEIGHT (iPhoneX ? 44.f : 20.f)
 // 导航栏高度
@@ -31,7 +40,7 @@
 #define Bottom_Margin(margin) ((margin)+HOME_INDICATOR_HEIGHT)
 
 
-static const NSInteger giftMaxNum = 99;
+static const NSInteger giftMaxNum = 5;
 
 @interface JPGiftShowManager()
 
@@ -55,9 +64,7 @@ static const NSInteger giftMaxNum = 99;
 @implementation JPGiftShowManager
 
 - (NSOperationQueue *)giftQueue1{
-    
     if (!_giftQueue1) {
-        
         _giftQueue1 = [[NSOperationQueue alloc] init];
         _giftQueue1.maxConcurrentOperationCount = 1;
     }
@@ -65,9 +72,7 @@ static const NSInteger giftMaxNum = 99;
 }
 
 - (NSOperationQueue *)giftQueue2{
-    
     if (!_giftQueue2) {
-        
         _giftQueue2 = [[NSOperationQueue alloc] init];
         _giftQueue2.maxConcurrentOperationCount = 1;
     }
@@ -75,9 +80,7 @@ static const NSInteger giftMaxNum = 99;
 }
 
 - (NSMutableArray *)curentGiftKeys{
-    
     if (!_curentGiftKeys) {
-        
         _curentGiftKeys = [NSMutableArray array];
     }
     return _curentGiftKeys;
@@ -90,7 +93,9 @@ static const NSInteger giftMaxNum = 99;
         CGFloat itemH = itemW*105/93.8;
         
         __weak typeof(self) weakSelf = self;
-        CGFloat showViewW = 10+showGiftView_UserIcon_LT+showGiftView_UserIcon_WH+showGiftView_UserName_L+showGiftView_UserName_W+showGiftView_GiftIcon_W+showGiftView_XNum_L+showGiftView_XNum_W;
+//        CGFloat showViewW = 10+showGiftView_UserIcon_LT+showGiftView_UserIcon_WH+showGiftView_UserName_W+showGiftView_GiftIcon_W+showGiftView_XNum_L+showGiftView_XNum_W;
+        CGFloat showViewW = 220;
+        
         CGFloat showViewY = SCREEN_HEIGHT-Bottom_Margin(44)-2*itemH-showGiftView_GiftIcon_H-10-15;
         _giftShowView1 = [[JPGiftShowView alloc] initWithFrame:CGRectMake(-showViewW, showViewY, showViewW, showGiftView_GiftIcon_H)];
         [_giftShowView1 setShowViewKeyBlock:^(JPGiftModel *giftModel) {
@@ -110,7 +115,9 @@ static const NSInteger giftMaxNum = 99;
         CGFloat itemH = itemW*105/93.8;
         
         __weak typeof(self) weakSelf = self;
-        CGFloat showViewW = 10+showGiftView_UserIcon_LT+showGiftView_UserIcon_WH+showGiftView_UserName_L+showGiftView_UserName_W+showGiftView_GiftIcon_W+showGiftView_XNum_L+showGiftView_XNum_W;
+//        CGFloat showViewW = 10+showGiftView_UserIcon_LT+showGiftView_UserIcon_WH+showGiftView_UserName_W+showGiftView_GiftIcon_W+showGiftView_XNum_L+showGiftView_XNum_W;
+        CGFloat showViewW = 220;
+        
         CGFloat showViewY = SCREEN_HEIGHT-Bottom_Margin(44)-2*itemH-showGiftView_GiftIcon_H*2-2*10-15;
         _giftShowView2 = [[JPGiftShowView alloc] initWithFrame:CGRectMake(-showViewW, showViewY, showViewW, showGiftView_GiftIcon_H)];
         [_giftShowView2 setShowViewKeyBlock:^(JPGiftModel *giftModel) {

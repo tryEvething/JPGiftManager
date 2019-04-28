@@ -16,7 +16,16 @@
 #define SCREEN_HEIGHT ([UIScreen mainScreen].bounds.size.height)
 
 // 判断是否是iPhone X
-#define iPhoneX ([UIScreen instancesRespondToSelector:@selector(currentMode)] ? CGSizeEqualToSize(CGSizeMake(1125, 2436), [[UIScreen mainScreen] currentMode].size) : NO)
+//#define iPhoneX ([UIScreen instancesRespondToSelector:@selector(currentMode)] ? CGSizeEqualToSize(CGSizeMake(1125, 2436), [[UIScreen mainScreen] currentMode].size) : NO)
+#define iPhoneX ({\
+BOOL isPhoneX = NO;\
+if (@available(iOS 11.0, *)) {\
+if (!UIEdgeInsetsEqualToEdgeInsets([UIApplication sharedApplication].delegate.window.safeAreaInsets, UIEdgeInsetsZero)) {\
+isPhoneX = YES;\
+}\
+}\
+isPhoneX;\
+})
 // 状态栏高度
 #define STATUS_BAR_HEIGHT (iPhoneX ? 44.f : 20.f)
 // 导航栏高度
@@ -69,14 +78,16 @@ static NSString *cellID = @"JPGiftCollectionViewCell";
 - (void)p_SetUI {
     
     UIView *bottomView = [[UIView alloc] initWithFrame: CGRectMake(0, self.frame.size.height-Bottom_Margin(44), self.frame.size.width, Bottom_Margin(44))];
-    bottomView.backgroundColor = [UIColor blackColor];
+    bottomView.backgroundColor = [UIColor whiteColor];
+    bottomView.tag = 10;
     [self addSubview:bottomView];
     self.bottomView = bottomView;
     
-    self.pageControl = [[UIPageControl alloc]initWithFrame: CGRectMake(CGRectGetWidth(bottomView.frame)*0.5-15, 0, 30, CGRectGetHeight(bottomView.frame))];
-    self.pageControl.currentPageIndicatorTintColor = [UIColor whiteColor];
+    self.pageControl = [[UIPageControl alloc]initWithFrame: CGRectMake(CGRectGetWidth(bottomView.frame)*0.5-15, 0, 30, 30)];
+    self.pageControl.currentPageIndicatorTintColor = [UIColor colorWithRed:253/255.0 green:161/255.0 blue:40/255.0 alpha:1.0];
     self.pageControl.pageIndicatorTintColor = [UIColor grayColor];
     self.pageControl.hidden = YES;
+    self.pageControl.userInteractionEnabled = NO;
     [bottomView addSubview:self.pageControl];
     
     
@@ -94,13 +105,13 @@ static NSString *cellID = @"JPGiftCollectionViewCell";
     
     UILabel *moneyLabel = [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(ccbImage.frame)+5, CGRectGetMinY(ccbImage.frame), 100, 20)];
     moneyLabel.text = @"999";
-    moneyLabel.textColor = [UIColor whiteColor];
+    moneyLabel.textColor = [UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1.0];
     moneyLabel.font = [UIFont systemFontOfSize:13];
     [bottomView addSubview:moneyLabel];
     self.moneyLabel = moneyLabel;
     
-    UIButton *sendBtn = [[UIButton alloc] initWithFrame:CGRectMake(self.bottomView.frame.size.width-60, 2, 60, 40)];
-    [sendBtn setBackgroundColor:[UIColor orangeColor]];
+    UIButton *sendBtn = [[UIButton alloc] initWithFrame:CGRectMake(self.bottomView.frame.size.width-100, 0, 100, 44)];
+    [sendBtn setBackgroundColor:[UIColor colorWithRed:253/255.0 green:161/255.0 blue:40/255.0 alpha:1.0]];
     [sendBtn setTitle:@"发送" forState:UIControlStateNormal];
     [sendBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     [sendBtn addTarget:self action:@selector(p_ClickSendBtn) forControlEvents:UIControlEventTouchUpInside];
@@ -108,15 +119,17 @@ static NSString *cellID = @"JPGiftCollectionViewCell";
     
     //110*125
     CGFloat itemW = SCREEN_WIDTH/4.0;
-    CGFloat itemH = itemW*125/110.0;
+    CGFloat itemH = roundf(itemW*125/110.0);
     JPHorizontalLayout *layout = [[JPHorizontalLayout alloc] init];
     
-    UICollectionView *collectionView = [[UICollectionView alloc] initWithFrame:CGRectMake(0, CGRectGetMinY(bottomView.frame)-1-2*itemH, SCREEN_WIDTH, 2*itemH) collectionViewLayout:layout];
+    UICollectionView *collectionView = [[UICollectionView alloc] initWithFrame:CGRectMake(0, CGRectGetMinY(bottomView.frame)-2*itemH, SCREEN_WIDTH, 2*itemH) collectionViewLayout:layout];
+    collectionView.backgroundColor = [UIColor whiteColor];
     collectionView.delegate = self;
     collectionView.dataSource = self;
     collectionView.bounces = NO;
     [collectionView registerClass:[JPGiftCollectionViewCell class] forCellWithReuseIdentifier:cellID];
     collectionView.pagingEnabled = YES;
+    collectionView.showsHorizontalScrollIndicator = NO;
     [self addSubview:collectionView];
     self.collectionView = collectionView;
 }
@@ -225,8 +238,13 @@ static NSString *cellID = @"JPGiftCollectionViewCell";
 }
 
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-    
-    [self hiddenGiftView];
+    //获取触摸点的集合
+    NSSet * allTouches = [event allTouches];
+    //获取触摸对象
+    UITouch * touch = [allTouches anyObject];
+    if (touch.view.tag != 10) {
+        [self hiddenGiftView];
+    }
 }
 
 @end

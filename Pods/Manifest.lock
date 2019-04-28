@@ -1,0 +1,61 @@
+PODS:
+  - AFNetworking (3.2.1):
+    - AFNetworking/NSURLSession (= 3.2.1)
+    - AFNetworking/Reachability (= 3.2.1)
+    - AFNetworking/Security (= 3.2.1)
+    - AFNetworking/Serialization (= 3.2.1)
+    - AFNetworking/UIKit (= 3.2.1)
+  - AFNetworking/NSURLSession (3.2.1):
+    - AFNetworking/Reachability
+    - AFNetworking/Security
+    - AFNetworking/Serialization
+  - AFNetworking/Reachability (3.2.1)
+  - AFNetworking/Security (3.2.1)
+  - AFNetworking/Serialization (3.2.1)
+  - AFNetworking/UIKit (3.2.1):
+    - AFNetworking/NSURLSession
+  - Masonry (1.1.0)
+  - Protobuf (3.7.0)
+  - SDWebImage (5.0.1):
+    - SDWebImage/Core (= 5.0.1)
+  - SDWebImage/Core (5.0.1)
+  - SSZipArchive (2.1.5)
+  - SVGAPlayer (2.3.3):
+    - SVGAPlayer/Core (= 2.3.3)
+    - SVGAPlayer/ProtoFiles (= 2.3.3)
+  - SVGAPlayer/Core (2.3.3):
+    - SSZipArchive (>= 1.8.1)
+    - SVGAPlayer/ProtoFiles
+  - SVGAPlayer/ProtoFiles (2.3.3):
+    - Protobuf (~> 3.4)
+  - YYModel (1.0.4)
+
+DEPENDENCIES:
+  - AFNetworking
+  - Masonry
+  - SDWebImage
+  - SVGAPlayer
+  - YYModel
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - AFNetworking
+    - Masonry
+    - Protobuf
+    - SDWebImage
+    - SSZipArchive
+    - SVGAPlayer
+    - YYModel
+
+SPEC CHECKSUMS:
+  AFNetworking: b6f891fdfaed196b46c7a83cf209e09697b94057
+  Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
+  Protobuf: 7a877b7f3e5964e3fce995e2eb323dbc6831bb5a
+  SDWebImage: 27dd2c9ea07a2252f94557c9fbb6105ee94b74c9
+  SSZipArchive: cefe1364104a0231268a5deb8495bdf2861f52f0
+  SVGAPlayer: cf93c1761209c478003951fa23376e7ed7dedc96
+  YYModel: 2a7fdd96aaa4b86a824e26d0c517de8928c04b30
+
+PODFILE CHECKSUM: f1c138b06d366aade04a87c2054803a9d59e7e04
+
+COCOAPODS: 1.6.1

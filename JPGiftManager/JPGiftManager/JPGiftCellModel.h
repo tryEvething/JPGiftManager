@@ -14,6 +14,7 @@
 @property(nonatomic,copy)NSString *id;
 /** icon */
 @property(nonatomic,copy)NSString *icon;
+@property(nonatomic,copy)NSString *headIcon;
 /** icon_gif */
 @property(nonatomic,copy)NSString *icon_gif;
 /** name */
@@ -28,5 +29,7 @@
 @property(nonatomic,copy)NSString *username;
 /** cost_type 0星星 1测测币 */
 @property(nonatomic,copy)NSString *cost_type;
+
+@property(nonatomic,copy)NSString *giftOrder;
 
 @end
