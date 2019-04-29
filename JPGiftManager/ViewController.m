@@ -117,11 +117,12 @@
     
     if (self.changeBtn.selected) {
         
+        NSLog(@"11111");
+        
         [[JPGiftShowManager sharedManager] showGiftViewWithBackView:self.view info:giftModel completeBlock:^(BOOL finished) {
             //结束
             NSLog(@"22222");
         } completeShowGifImageBlock:^(JPGiftModel *giftModel) {
-            NSLog(@"11111");
             if ([giftModel.giftId integerValue] < 7) {
                 
 //                [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;

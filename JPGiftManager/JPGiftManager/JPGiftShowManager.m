@@ -165,7 +165,9 @@ static const NSInteger giftMaxNum = 5;
             //当前存在操作
             JPGiftOperation *op = [self.operationCache objectForKey:giftModel.giftKey];
             //限制一次礼物的连击最大值
-            if (op.giftShowView.currentGiftCount >= giftMaxNum) {
+            if (op.giftShowView.currentGiftCount >= (giftMaxNum - 1)) {
+                //赋值当前礼物数
+                op.giftShowView.giftCount = giftModel.sendCount;
                 //移除操作
                 [self.operationCache removeObjectForKey:giftModel.giftKey];
                 //清空唯一key
