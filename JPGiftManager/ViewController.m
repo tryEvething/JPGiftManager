@@ -17,6 +17,8 @@
 #import <SDAnimatedImageView+WebCache.h>
 #import "SVGA.h"
 
+#define GifAnimateDuration 3
+
 @interface ViewController ()<JPGiftViewDelegate, SVGAPlayerDelegate>
 /** gift */
 @property(nonatomic,strong) JPGiftView *giftView;
@@ -26,6 +28,8 @@
 
 @property (nonatomic, strong) SVGAPlayer *aPlayer;
 @property (nonatomic, strong) SVGAParser *parser;
+
+@property (nonatomic, strong) NSOperationQueue *queue;
 
 @end
 
@@ -56,6 +60,13 @@
     HUDView.alpha = 0.9f;
     HUDView.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height);
     [self.aPlayer addSubview:HUDView];
+    
+    // 1.创建队列
+    _queue = [[NSOperationQueue alloc] init];
+    // 2.设置最大并发操作数
+    _queue.maxConcurrentOperationCount = 1; // 串行队列
+    
+    [self.view addSubview:self.gifImageView];
 }
 
 - (void)viewWillLayoutSubviews {
@@ -94,14 +105,14 @@
 
 - (void)giftViewSendGiftInView:(JPGiftView *)giftView data:(JPGiftCellModel *)model {
     
-    NSArray *items = @[
-                       @"https://github.com/yyued/SVGA-Samples/blob/master/Walkthrough.svga?raw=true",
-                       @"https://github.com/yyued/SVGA-Samples/blob/master/angel.svga?raw=true",
-                       @"https://github.com/yyued/SVGA-Samples/blob/master/halloween.svga?raw=true",
-                       @"https://github.com/yyued/SVGA-Samples/blob/master/kingset.svga?raw=true",
-                       @"https://github.com/yyued/SVGA-Samples/blob/master/posche.svga?raw=true",
-                       @"https://github.com/yyued/SVGA-Samples/blob/master/rose.svga?raw=true",
-                       ];
+    //    NSArray *items = @[
+    //                       @"https://github.com/yyued/SVGA-Samples/blob/master/Walkthrough.svga?raw=true",
+    //                       @"https://github.com/yyued/SVGA-Samples/blob/master/angel.svga?raw=true",
+    //                       @"https://github.com/yyued/SVGA-Samples/blob/master/halloween.svga?raw=true",
+    //                       @"https://github.com/yyued/SVGA-Samples/blob/master/kingset.svga?raw=true",
+    //                       @"https://github.com/yyued/SVGA-Samples/blob/master/posche.svga?raw=true",
+    //                       @"https://github.com/yyued/SVGA-Samples/blob/master/rose.svga?raw=true",
+    //                       ];
     NSArray *items2 = @[@"Walkthrough",@"angel",@"halloween",@"kingset",@"posche",@"rose"];
     
     JPGiftModel *giftModel = [[JPGiftModel alloc] init];
@@ -110,76 +121,107 @@
     giftModel.giftName = model.name;
     giftModel.giftImage = model.icon;
     giftModel.giftGifImage = model.icon_gif;
-//    giftModel.giftId = model.id;
+    //    giftModel.giftId = model.id;
     giftModel.giftId = model.giftOrder;
     giftModel.defaultCount = 0;
     giftModel.sendCount = 1;
     
     if (self.changeBtn.selected) {
         
-        NSLog(@"11111");
-        
         [[JPGiftShowManager sharedManager] showGiftViewWithBackView:self.view info:giftModel completeBlock:^(BOOL finished) {
             //结束
             NSLog(@"22222");
         } completeShowGifImageBlock:^(JPGiftModel *giftModel) {
+            
             if ([giftModel.giftId integerValue] < 7) {
-                
-//                [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-//                [self.parser parseWithURL:[NSURL URLWithString:items[ ([giftModel.giftId integerValue] - 1) ]] completionBlock:^(SVGAVideoEntity * _Nullable videoItem) {
-//
-//                     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-//                     if (videoItem != nil) {
-//                         self.aPlayer.hidden = NO;
-//                         self.aPlayer.videoItem = videoItem;
-//                         [self.aPlayer startAnimation];
-//                         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-//                             self.aPlayer.hidden = YES;
-//                             [self.aPlayer stopAnimation];
-//                             [self.aPlayer clear];
-//                         });
-//                     }
-//                 } failureBlock:nil];
-                
                 NSString *myBundlePath = [[NSBundle mainBundle] pathForResource:@"svga" ofType:@"bundle"];
                 NSBundle *myBundle = [NSBundle bundleWithPath:myBundlePath];
                 [self.parser parseWithNamed:items2[([giftModel.giftId integerValue] - 1)] inBundle:myBundle completionBlock:^(SVGAVideoEntity * _Nonnull videoItem) {
-                    
-                    if (videoItem != nil) {
-                        self.aPlayer.hidden = NO;
+                    if (videoItem) {
+                        //取消上一个的消失动画,直接加载下一个动画
+                        [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(hiddenGiftShowView) object:nil];
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            self.aPlayer.hidden = NO;
+                        });
+                        
                         self.aPlayer.videoItem = videoItem;
                         [self.aPlayer startAnimation];
-                        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                            self.aPlayer.hidden = YES;
-                            [self.aPlayer stopAnimation];
-                            [self.aPlayer clear];
-                        });
+                        
+                        [self performSelector:@selector(hiddenGiftShowView) withObject:nil afterDelay:GifAnimateDuration];
                     }
                 } failureBlock:nil];
             }else{
                 //展示gifimage
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    UIWindow *window = [UIApplication sharedApplication].keyWindow;
-                    [window addSubview:self.gifImageView];
+                    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(hiddenGiftShowView) object:nil];
                     [self.gifImageView sd_setImageWithURL:[NSURL URLWithString:giftModel.giftGifImage]];
                     self.gifImageView.hidden = NO;
-                    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                        self.gifImageView.hidden = YES;
-                        [self.gifImageView sd_setImageWithURL:[NSURL URLWithString:@""]];
-                        [self.gifImageView removeFromSuperview];
-                    });
+                    
+                    [self performSelector:@selector(hiddenGiftShowView2) withObject:nil afterDelay:GifAnimateDuration];
                 });
             }
-            
         }];
     }else {
+        // 无特效显示
+        //        [[JPGiftShowManager sharedManager] showGiftViewWithBackView:self.view info:giftModel completeBlock:^(BOOL finished) {
+        //            //结束
+        //            NSLog(@"333333");
+        //        }];
         
+        // 更换特效为顺序队列,当前一个显示完后再显示下一个
         [[JPGiftShowManager sharedManager] showGiftViewWithBackView:self.view info:giftModel completeBlock:^(BOOL finished) {
             //结束
-            NSLog(@"333333");
+            NSLog(@"22222");
+        } completeShowGifImageBlock:^(JPGiftModel *giftModel) {
+            
+            
+            if ([giftModel.giftId integerValue] < 7) {
+                NSString *myBundlePath = [[NSBundle mainBundle] pathForResource:@"svga" ofType:@"bundle"];
+                NSBundle *myBundle = [NSBundle bundleWithPath:myBundlePath];
+                [self.parser parseWithNamed:items2[([giftModel.giftId integerValue] - 1)] inBundle:myBundle completionBlock:^(SVGAVideoEntity * _Nonnull videoItem) {
+                    [self.queue addOperationWithBlock:^{
+                        if (videoItem) {
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                                self.aPlayer.hidden = NO;
+                            });
+                            
+                            self.aPlayer.videoItem = videoItem;
+                            [self.aPlayer startAnimation];
+                            
+                            [NSThread sleepForTimeInterval:GifAnimateDuration];
+                            [self hiddenGiftShowView];
+                        }
+                    }];
+                } failureBlock:nil];
+            }else{
+                //展示gifimage
+                [self.queue addOperationWithBlock:^{
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self.gifImageView sd_setImageWithURL:[NSURL URLWithString:giftModel.giftGifImage]];
+                        self.gifImageView.hidden = NO;
+                    });
+                    
+                    [NSThread sleepForTimeInterval:GifAnimateDuration];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self hiddenGiftShowView2];
+                    });
+                }];
+            }
         }];
-
     }
+}
+
+- (void)hiddenGiftShowView{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.aPlayer.hidden = YES;
+    });
+    [self.aPlayer stopAnimation];
+    [self.aPlayer clear];
+}
+
+- (void)hiddenGiftShowView2{
+    self.gifImageView.hidden = YES;
+    self.gifImageView.image = nil;
 }
 
 
