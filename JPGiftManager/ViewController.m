@@ -132,7 +132,7 @@
             //结束
             NSLog(@"22222");
         } completeShowGifImageBlock:^(JPGiftModel *giftModel) {
-            
+            // 两种加载方式,一种svga http://svga.io/  另一种加载Gif图
             if ([giftModel.giftId integerValue] < 7) {
                 NSString *myBundlePath = [[NSBundle mainBundle] pathForResource:@"svga" ofType:@"bundle"];
                 NSBundle *myBundle = [NSBundle bundleWithPath:myBundlePath];
